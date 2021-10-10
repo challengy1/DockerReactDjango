@@ -1,0 +1,8 @@
+Django
+django-cors-headers
+djangorestframework
+Pillow
+gunicorn
+psycopg2-binary
+django-debug-toolbar
+django-cleanup

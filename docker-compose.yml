@@ -1,0 +1,51 @@
+version: '3'
+services:
+  web-db:
+    image: postgres:13.4-alpine
+    environment:
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=postgres'
+    networks:
+      - app_network
+    volumes:
+      - type: bind
+        source: ./web-db/data
+        target: /var/lib/postgresql/data
+    hostname: web-db
+    restart: always
+
+  web-back:
+    environment:
+      - PYTHONPATH=/code
+      - DJANGO_SETTINGS_MODULE=root.debugsettings
+    image: django:latest
+    container_name: web-back
+    volumes:
+      - type: bind
+        source: ./web-back
+        target: /code
+    networks:
+      - app_network
+    ports:
+      - "8000:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - web-db
+
+  web-front:
+    image: node:14.17.6-bullseye-slim
+    volumes:
+      - type: bind
+        source: ./web-front
+        target: /code
+    networks:
+      - app_network
+    ports:
+      - "3000:3000"
+    command: sh -c "cd /code && npm run start"
+    depends_on:
+      - web-back
+
+networks:
+  app_network:
+    driver: bridge
